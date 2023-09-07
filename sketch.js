@@ -5,8 +5,41 @@ let result;
 let input;
 let button0;
 let buttonEquals;
+let moodDisplay;
+let likedDisplay;
+let dislikedDisplay;
+
+let hasBlockedInput = false;
+let counter = 0;
+let secondInMilliseconds = 1000;
+
+let allAttributes = ["7", "8", "9", "/",
+                     "4", "5", "6", "*",
+                     "1", "2", "3", "-", 
+                     "0", ".", "+"];
+
+let likedAttributes = [];
+let dislikedAttributes = [];
+
+let mood = 100;
+let restEffect = 1;
+let preferenceEffect = 5;
+
+let notAnnoyedThreshold = 95;
+let slightlyAnnoyedThreshold = 75;
+let prettyAnnoyedThreshold = 40;
+let superAnnoyedThreshold = 10;
+
+let recoveryPeriod = 3;
+let recoveryCounter = 0;
 
 function setup() {
+  let index = floor(random(0, allAttributes.length - 1));
+  likedAttributes.push(allAttributes[index]);
+  allAttributes.slice(index, index);
+  index = floor(random(0, allAttributes.length - 1));
+  dislikedAttributes.push(allAttributes[index]);
+
   noCanvas();
   // Put setup code here
   result = createP("&nbsp;");
@@ -36,6 +69,10 @@ function setup() {
   createElement("br");
   buttonEquals = createButton("=");
   buttons.push(buttonEquals);
+  
+  moodDisplay = createP("&nbsp;");
+  likedDisplay = createP("&nbsp;");
+  dislikedDisplay = createP("&nbsp;");
 
   for (let index = 0; index < buttons.length; index += 1) {
     // get () item of list
@@ -69,10 +106,36 @@ function setup() {
     .style("background-color", "rgb(0, 120, 255)")
     .style("text-align", "right")
     .style("font-size", "5em");
+
+  moodDisplay
+    .style("width", "481px")
+    .style("background-color", "rgb(0, 120, 255)")
+    .style("text-align", "right")
+    .style("font-size", "5em");
+
+  likedDisplay
+    .style("width", "481px")
+    .style("background-color", "rgb(0, 120, 255)")
+    .style("text-align", "right")
+    .style("font-size", "5em");
+
+  dislikedDisplay
+    .style("width", "481px")
+    .style("background-color", "rgb(0, 120, 255)")
+    .style("text-align", "right")
+    .style("font-size", "5em");
+
+  likedDisplay.html(likedAttributes.join(" "));
+  dislikedDisplay.html(dislikedAttributes.join(" "));
 }
 
 function OnButtonClicked() {
+  
+  if (hasBlockedInput) return;
+
   let value = this.html();
+
+  EvaluateValue(value);
 
   if (value === "+") {
     math.push(value);
@@ -112,12 +175,69 @@ function OnButtonClicked() {
         index--;
       }
     }
-    result.html(math.join(" "));
-    math.length = 0;
-    math.push("");
+    SetResult();
   } else {
     math[math.length - 1] += value;
   }
 
   input.value(math.join(" "));
+}
+
+function SetResult() {
+  let endResult = math[0];
+  
+  if (random(0, 100) > mood) {
+    endResult = AddChaos(endResult);
+  }
+
+  result.html(endResult);
+  math.length = 0;
+  math.push("");
+}
+
+function AddChaos(correctResult) {
+  let chaoticResult = correctResult + floor(random(mood - 100, 100 - mood));
+
+  return chaoticResult;
+}
+
+function EvaluateValue(value) {
+  if (dislikedAttributes.includes(value)) {
+    mood -= preferenceEffect;
+  } else if (likedAttributes.includes(value)) {
+    mood += preferenceEffect;
+  }
+
+  mood -= restEffect;
+  recoveryCounter = 0; 
+}
+
+function clampMood() {
+  mood = constrain(mood, 0, 100);
+}
+
+function OutputString(string) {
+  result.html(string);
+}
+
+function SetInputBlocked(state) {
+  hasBlockedInput = state;
+}
+
+function draw() {
+  clampMood();
+  moodDisplay.html(mood);
+  recoveryCounter += deltaTime;
+
+  if (recoveryCounter > 3000) {
+    mood += restEffect;
+    recoveryCounter = 0;
+  }
+
+  // if (counter > 3 * secondInMilliseconds) {
+  //   OutputString(":(");
+  //   counter = -100 * secondInMilliseconds;
+  //   SetInputBlocked(true);
+  //   setTimeout(SetInputBlocked, 10.0 * secondInMilliseconds, false);
+  // }
 }
