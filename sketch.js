@@ -9,6 +9,8 @@ let moodDisplay;
 let likedDisplay;
 let dislikedDisplay;
 const DEBUG = false;
+let badColor;
+let goodColor;
 
 let hasBlockedInput = false;
 let counter = 0;
@@ -24,17 +26,26 @@ let dislikedAttributes = [];
 
 let mood = 100;
 let restEffect = 1;
-let preferenceEffect = 5;
+let preferenceEffect = 10;
 
 let notAnnoyedThreshold = 95;
 let slightlyAnnoyedThreshold = 75;
 let prettyAnnoyedThreshold = 40;
 let superAnnoyedThreshold = 10;
 
-let recoveryPeriod = 3;
+let recoveryPeriod = 1;
 let recoveryCounter = 0;
 
 function setup() {
+  let calcName = prompt("Please name your calculator", "");
+  if (calcName == null || calcName == "") {
+    calcName = "Anonymous Calculator";
+  }
+
+  document.getElementById("name").innerHTML = calcName;
+
+  badColor = color(237, 56, 43);
+  goodColor = color(43, 134, 237);
   let index = floor(random(0, allAttributes.length - 1));
   likedAttributes.push(allAttributes[index]);
   allAttributes.slice(index, index);
@@ -43,33 +54,37 @@ function setup() {
 
   noCanvas();
   // Put setup code here
-  result = createP("&nbsp;");
-  input = createInput("");
+  result = createP("&nbsp;").parent("content");
+  input = createInput("").parent("content");
   buttons.push(result); // buttons = [result]
   buttons.push(input); // buttons = [result, input]
-  createElement("br"); // br = break
-  buttons.push(createButton("7")); // buttons = [result, input, 7]
-  buttons.push(createButton("8")); // buttons = [result, input, 7, 8]
-  buttons.push(createButton("9")); // buttons = [result, input, 7, 8, 9]
-  buttons.push(createButton("/")); // buttons = [result, input, 7, 8, 9, /]
-  createElement("br");
-  buttons.push(createButton("4")); // buttons = [result, input, 7, 8, 9, /, 4]
-  buttons.push(createButton("5")); // buttons = [result, input, 7, 8, 9, /, 4, 5]
-  buttons.push(createButton("6")); // buttons = [result, input, 7, 8, 9, /, 4, 5, 6]
-  buttons.push(createButton("*"));
-  createElement("br");
-  buttons.push(createButton("1"));
-  buttons.push(createButton("2"));
-  buttons.push(createButton("3")); //              0       1    2  3  4  5  6  7  8  9 10 11 12 13
-  buttons.push(createButton("-")); // buttons = [result, input, 7, 8, 9, /, 4, 5, 6, *, 1, 2, 3, -]
-  createElement("br");
-  button0 = createButton("0");
+  createElement("br").parent("content"); // br = break
+  buttons.push(createButton("7").parent("content")); // buttons = [result, input, 7]
+  buttons.push(createButton("8").parent("content")); // buttons = [result, input, 7, 8]
+  buttons.push(createButton("9").parent("content")); // buttons = [result, input, 7, 8, 9]
+  buttons.push(createButton("/").parent("content")); // buttons = [result, input, 7, 8, 9, /]
+  createElement("br").parent("content");
+  buttons.push(createButton("4").parent("content")); // buttons = [result, input, 7, 8, 9, /, 4]
+  buttons.push(createButton("5").parent("content")); // buttons = [result, input, 7, 8, 9, /, 4, 5]
+  buttons.push(createButton("6").parent("content")); // buttons = [result, input, 7, 8, 9, /, 4, 5, 6]
+  buttons.push(createButton("*").parent("content"));
+  createElement("br").parent("content");
+  buttons.push(createButton("1").parent("content"));
+  buttons.push(createButton("2").parent("content"));
+  buttons.push(createButton("3").parent("content")); //              0       1    2  3  4  5  6  7  8  9 10 11 12 13
+  buttons.push(createButton("-").parent("content")); // buttons = [result, input, 7, 8, 9, /, 4, 5, 6, *, 1, 2, 3, -]
+  createElement("br").parent("content");
+  button0 = createButton("0").parent("content");
   buttons.push(button0);
-  buttons.push(createButton("."));
-  buttons.push(createButton("+"));
-  createElement("br");
-  buttonEquals = createButton("=");
+  buttons.push(createButton(".").parent("content"));
+  buttons.push(createButton("+").parent("content"));
+  createElement("br").parent("content");
+  buttonEquals = createButton("=").parent("content");
   buttons.push(buttonEquals);
+
+  // buttons.forEach(button => {
+  //   button.parent("content");
+  // });
   
   moodDisplay = createP("&nbsp;");
   likedDisplay = createP("&nbsp;");
@@ -211,12 +226,18 @@ function SetInputBlocked(state) {
 
 function draw() {
   clampMood();
+
+  let r = lerpColor(badColor, goodColor, map(mood, 0, 100, 0, 1));
+  result
+    .style("background-color", r);
+
   if (DEBUG) {
     moodDisplay.html(mood);
+    moodDisplay.html(r);
   }
   recoveryCounter += deltaTime;
 
-  if (recoveryCounter > 3000) {
+  if (recoveryCounter > recoveryPeriod * 1000) {
     mood += restEffect;
     recoveryCounter = 0;
   }
