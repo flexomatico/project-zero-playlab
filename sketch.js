@@ -8,6 +8,7 @@ let buttonEquals;
 let moodDisplay;
 let likedDisplay;
 let dislikedDisplay;
+const DEBUG = false;
 
 let hasBlockedInput = false;
 let counter = 0;
@@ -107,26 +108,10 @@ function setup() {
     .style("text-align", "right")
     .style("font-size", "5em");
 
-  moodDisplay
-    .style("width", "481px")
-    .style("background-color", "rgb(0, 120, 255)")
-    .style("text-align", "right")
-    .style("font-size", "5em");
-
-  likedDisplay
-    .style("width", "481px")
-    .style("background-color", "rgb(0, 120, 255)")
-    .style("text-align", "right")
-    .style("font-size", "5em");
-
-  dislikedDisplay
-    .style("width", "481px")
-    .style("background-color", "rgb(0, 120, 255)")
-    .style("text-align", "right")
-    .style("font-size", "5em");
-
-  likedDisplay.html(likedAttributes.join(" "));
-  dislikedDisplay.html(dislikedAttributes.join(" "));
+    if (DEBUG) {
+      likedDisplay.html(likedAttributes.join(" "));
+      dislikedDisplay.html(dislikedAttributes.join(" "));
+    }
 }
 
 function OnButtonClicked() {
@@ -226,7 +211,9 @@ function SetInputBlocked(state) {
 
 function draw() {
   clampMood();
-  moodDisplay.html(mood);
+  if (DEBUG) {
+    moodDisplay.html(mood);
+  }
   recoveryCounter += deltaTime;
 
   if (recoveryCounter > 3000) {
